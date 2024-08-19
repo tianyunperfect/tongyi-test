@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--注：如果报文件格式错误，一定是依赖中没有排队干净自带的Log依赖！！！-->
+<!--Configuration后面的status，这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，你会看到log4j2内部各种详细输出-->
+<!--monitorInterval：Log4j能够自动检测修改配置 文件和重新配置本身，设置间隔秒数-->
+<configuration monitorInterval="5">
+    <Properties>
+        <property name="APP_NAME">app</property>
+        <property name="LOGGER_LEVEL">INFO</property>
+        <property name="LOGGER_PATH">logs</property>
+
+        <Property name="LOG_HOME">${LOGGER_PATH}/${APP_NAME}</Property>
+        <Property name="INTERVAL_PERIOD">1</Property>
+        <Property name="EXPIRATION_DAY">3d</Property>
+        <Property name="log_pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}] %-5level %logger{36} - %msg%n
+        </Property>
+        <Property name="rolling_file_name">-%d{yyyy-MM-dd}.log</Property>
+        <Property name="rollover_strategy_max">30</Property>
+        <Property name="LOG_HOME_PROJECT">${LOG_HOME}/${APP_NAME}-project-info</Property>
+        <Property name="LOG_HOME_PROJECT_ERROR">${LOG_HOME}/${APP_NAME}-project-error</Property>
+        <Property name="LOG_HOME_MSDP">${LOG_HOME}/${APP_NAME}-msdp</Property>
+        <Property name="LOG_HOME_SQL">${LOG_HOME}/${APP_NAME}-sql</Property>
+        <Property name="LOG_HOME_ACCESS">${LOG_HOME}/${APP_NAME}-access</Property>
+        <Property name="LOG_HOME_ACCESS_ERROR">${LOG_HOME}/${APP_NAME}-access-error</Property>
+    </Properties>
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${log_pattern}"/>
+            <ThresholdFilter level="${LOGGER_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <RollingFile name="projectRolling"
+                     fileName="${LOG_HOME_PROJECT}.log"
+                     filePattern="${LOG_HOME_PROJECT}${rolling_file_name}"
+                     immediateFlush="false" append="true">
+            <PatternLayout>
+                <Pattern>${log_pattern}</Pattern>
+                <Charset>UTF-8</Charset>
+            </PatternLayout>
+            <Policies>
+                <!--interval属性用来指定多久滚动一次，默认是1 hour-->
+                <TimeBasedTriggeringPolicy interval="${INTERVAL_PERIOD}" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${rollover_strategy_max}">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*project-info*.log"/>
+                    <IfLastModified age="${EXPIRATION_DAY}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="projectErrorRolling"
+                     fileName="${LOG_HOME_PROJECT_ERROR}.log"
+                     filePattern="${LOG_HOME_PROJECT_ERROR}${rolling_file_name}"
+                     immediateFlush="false" append="true">
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout>
+                <Pattern>${log_pattern}</Pattern>
+                <Charset>UTF-8</Charset>
+            </PatternLayout>
+            <Policies>
+                <!--interval属性用来指定多久滚动一次，默认是1 hour-->
+                <TimeBasedTriggeringPolicy interval="${INTERVAL_PERIOD}" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${rollover_strategy_max}">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*project-error*.log"/>
+                    <IfLastModified age="${EXPIRATION_DAY}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="sqlRolling"
+                     fileName="${LOG_HOME_SQL}.log"
+                     filePattern="${LOG_HOME_SQL}${rolling_file_name}"
+                     immediateFlush="false" append="true">
+            <PatternLayout>
+                <Pattern>${log_pattern}</Pattern>
+                <Charset>UTF-8</Charset>
+            </PatternLayout>
+            <Policies>
+                <!--interval属性用来指定多久滚动一次，默认是1 hour-->
+                <TimeBasedTriggeringPolicy interval="${INTERVAL_PERIOD}" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${rollover_strategy_max}">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*sql*.log"/>
+                    <IfLastModified age="${EXPIRATION_DAY}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+    </appenders>
+
+    <loggers>
+        <AsyncLogger name="org.springframework" level="${LOGGER_LEVEL}" additivity="false">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="projectRolling"/>
+            <appender-ref ref="projectErrorRolling"/>
+        </AsyncLogger>
+        <AsyncLogger name="druid.sql" level="${LOGGER_LEVEL}" additivity="false">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="sqlRolling"/>
+        </AsyncLogger>
+        <AsyncLogger name="org.mybatis" level="${LOGGER_LEVEL}" additivity="false">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="sqlRolling"/>
+        </AsyncLogger>
+        <AsyncLogger name="com.bigtreefinance" level="${LOGGER_LEVEL}" additivity="false">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="projectRolling"/>
+            <appender-ref ref="projectErrorRolling"/>
+        </AsyncLogger>
+        <AsyncRoot level="${LOGGER_LEVEL}">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="projectRolling"/>
+            <appender-ref ref="projectErrorRolling"/>
+        </AsyncRoot>
+    </loggers>
+
+</configuration>
