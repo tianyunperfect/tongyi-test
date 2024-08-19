@@ -22,7 +22,7 @@ public class ChatController {
      * @param msg msg
      * @return {@link Result }<{@link String }>
      */
-    @GetMapping("/sendMsg")
+    @GetMapping("/question")
     public Result<String> sendMsg(@RequestParam String msg) {
         String chatRes = chatService.sendMsg(msg);
         return Result.success(chatRes);

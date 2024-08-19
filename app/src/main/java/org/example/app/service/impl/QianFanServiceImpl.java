@@ -16,10 +16,10 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class BaiduChatServiceImpl implements IChatService {
+public class QianFanServiceImpl implements IChatService {
 
     @Autowired
-    private BaiduModelConfig baiduChatConfig;
+    private QianFanConfig baiduChatConfig;
 
     @Autowired
     private IRedisService redisService;
@@ -65,7 +65,7 @@ public class BaiduChatServiceImpl implements IChatService {
         log.info("接收到用户消息: " + msg);
         try {
             // 遍历模型, 判断是否超过频率限制
-            for (BaiduModelConfig.BaiduModel model : baiduChatConfig.getModels()) {
+            for (QianFanConfig.BaiduModel model : baiduChatConfig.getModels()) {
                 String modelName = model.getModelName();
                 // 按顺序遍历模型, 如果超过频率限制，则跳过
                 if (redisService.isRateOk(modelName, model.getNumberVisits(), model.getTimeInSeconds())) {

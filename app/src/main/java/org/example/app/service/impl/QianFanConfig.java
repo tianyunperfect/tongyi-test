@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties("tongyi") // 通义千问
-public class BaiduModelConfig {
+public class QianFanConfig {
     private String appId;
     private String appKey;
     private String secretKey;
